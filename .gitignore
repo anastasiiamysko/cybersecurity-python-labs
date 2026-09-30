@@ -1,0 +1,12 @@
+# Віртуальне середовище
+.venv/
+venv/
+
+# Кеш Python та інструментів
+__pycache__/
+*.pyc
+.ruff_cache/
+
+# Динамічно згенеровані файли даних
+labs/lab01/data/*.csv
+labs/lab01/data/*.json
