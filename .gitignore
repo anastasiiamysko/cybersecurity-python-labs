@@ -10,3 +10,9 @@ __pycache__/
 # Динамічно згенеровані файли даних
 labs/lab01/data/*.csv
 labs/lab01/data/*.json
+.idea/
+.venv/
+__pycache__/
+*.pyc
+labs/lab02/data/*.json
+labs/lab02/data/*.csv

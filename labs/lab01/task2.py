@@ -15,6 +15,7 @@ def check_access(
     users: dict,
     blocked_users: set,
 ) -> tuple[str, str]:
+
     """Реалізує алгоритм перевірки доступу користувача до ресурсу."""
     if user_id not in users:
         return "DENY", "User not found"
@@ -33,7 +34,7 @@ def check_access(
 
 
 def run_task2():
-    """Основна функція для виконання Завдання 2."""
+    """Основна функція для виконання Завдання 2"""
     print(
         f"\n--- Завдання 2 | Студент: {STUDENT_NAME} "
         f"(Варіант {VARIANT_NUMBER}) ---"
