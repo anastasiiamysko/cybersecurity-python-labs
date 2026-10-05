@@ -59,7 +59,7 @@ def log_event(func):
             return res
         except Exception as e:
             result = f"failure ({type(e).__name__})"
-            raise e
+            raise
         finally:
             log_data = {
                 "event": "login",

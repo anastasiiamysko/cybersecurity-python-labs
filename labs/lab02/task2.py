@@ -1,21 +1,22 @@
 """Завдання 2 (Варіант 1): Аналізатор журналів веб-сервера (Nginx/Apache Access Log)."""
 
 import argparse
-from collections import Counter, defaultdict
 import csv
-from dataclasses import dataclass
-from datetime import datetime
 import json
 import logging
-from pathlib import Path
 import re
-from typing import Any, Optional
+from collections import Counter, defaultdict
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+logger = logging.getLogger(__name__)
 
 # Регулярний вираз для розбору рядків access.log (Combined Log Format)
 LOG_PATTERN = re.compile(
-    r'^(?P<ip>\S+)\s+\S+\s+\S+\s+\[(?P<time>[^\]]+)\]\s+"(?P<method>\S+)\s+(?P<uri>\S+)\s+HTTP/[0-9.]+"\s+(?P<status>\d{3})\s+(?P<bytes>\S+)'
+    r'^(?P<ip>\S+)\s+\S+\s+\S+\s+\[(?P<time>[^]]+)\]\s+"(?P<method>\S+)\s+(?P<uri>\S+)\s+HTTP/[0-9.]+"\s+(?P<status>\d{3})\s+(?P<bytes>\S+)'
 )
 
 # Сигнатури базових атак (SQLi, Directory Traversal, XSS)
@@ -40,7 +41,7 @@ class LogEntry:
     bytes_sent: int
 
 
-def parse_log_line(line: str) -> Optional[LogEntry]:
+def parse_log_line(line: str) -> LogEntry | None:
     """Розбирає рядок логу за допомогою регулярного виразу."""
     match = LOG_PATTERN.match(line.strip())
     if not match:
@@ -50,7 +51,9 @@ def parse_log_line(line: str) -> Optional[LogEntry]:
     try:
         # Формат дати: 27/Sep/2026:08:00:00 +0000
         time_part = data["time"].split()[0]
-        dt = datetime.strptime(time_part, "%d/%b/%Y:%H:%M:%S")
+        dt = datetime.strptime(time_part, "%d/%b/%Y:%H:%M:%S").replace(
+            tzinfo=timezone.utc
+        )
         bytes_sent = int(data["bytes"]) if data["bytes"].isdigit() else 0
 
         return LogEntry(
@@ -61,7 +64,7 @@ def parse_log_line(line: str) -> Optional[LogEntry]:
             status=int(data["status"]),
             bytes_sent=bytes_sent,
         )
-    except Exception:
+    except (ValueError, IndexError, KeyError):
         return None
 
 
@@ -77,10 +80,10 @@ def run_analyzer(
     output_path = Path(output)
 
     if not log_path.exists():
-        logging.error(f"Файл логу не знайдено: {log_path}")
+        logger.error(f"Файл логу не знайдено: {log_path}")
         return
 
-    logging.info(f"Loading access log from {log_path}...")
+    logger.info(f"Loading access log from {log_path}...")
 
     entries: list[LogEntry] = []
     error_ips: Counter[str] = Counter()
@@ -102,7 +105,7 @@ def run_analyzer(
             # Перевірка на атаки
             for attack_name, pattern in ATTACK_PATTERNS.items():
                 if pattern.search(entry.uri):
-                    logging.warning(
+                    logger.warning(
                         f'Potential {attack_name} attack from {entry.ip}: "{entry.method} {entry.uri}"'
                     )
                     detected_attacks.append(
@@ -118,7 +121,7 @@ def run_analyzer(
     if entries:
         min_time = min(e.timestamp for e in entries)
         max_time = max(e.timestamp for e in entries)
-        logging.info(
+        logger.info(
             f"Processed {len(entries)} log entries from {min_time} to {max_time}."
         )
 
@@ -156,7 +159,7 @@ def run_analyzer(
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=4, ensure_ascii=False)
 
-    logging.info(f"Analysis report saved to {output_path}")
+    logger.info(f"Analysis report saved to {output_path}")
 
 
 def setup_parser(subparsers: argparse._SubParsersAction) -> None:

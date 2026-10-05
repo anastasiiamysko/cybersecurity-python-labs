@@ -6,7 +6,7 @@ import sys
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 )
-from shared.student import STUDENT_NAME, VARIANT_NUMBER
+from shared.student import STUDENT_NAME, VARIANT_NUMBER  # noqa: E402
 
 
 def check_access(
@@ -15,7 +15,6 @@ def check_access(
     users: dict,
     blocked_users: set,
 ) -> tuple[str, str]:
-
     """Реалізує алгоритм перевірки доступу користувача до ресурсу."""
     if user_id not in users:
         return "DENY", "User not found"

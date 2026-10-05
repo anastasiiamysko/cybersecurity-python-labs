@@ -4,7 +4,8 @@ import argparse
 import time
 
 from labs.lab02.task1 import Admin, User, UserAccount
-from labs.lab02.task2 import run_analyzer, setup_parser as setup_task2_parser
+from labs.lab02.task2 import run_analyzer
+from labs.lab02.task2 import setup_parser as setup_task2_parser
 
 
 def run_demo() -> None:

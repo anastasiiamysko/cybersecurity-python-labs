@@ -1,12 +1,12 @@
 """Модуль Завдання 1: Класи User, Admin, Session, AuditLog та UserAccount."""
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
 import hashlib
 import hmac
 import os
 import re
-from typing import Any, Optional
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any
 
 PBKDF2_ITERATIONS = 100_000
 HASH_NAME = "sha256"
@@ -80,7 +80,7 @@ class Admin(User):
         self,
         username: str,
         email: str,
-        permissions: Optional[set[str]] = None,
+        permissions: set[str] | None = None,
         active: bool = True,
     ) -> None:
         super().__init__(username=username, email=email, role="admin", active=active)
@@ -160,9 +160,9 @@ SESSION_TIMEOUT_SEC = 900
 class UserAccount:
     """Обліковий запис (Композиція User, Session та AuditLog)."""
 
-    def __init__(self, user: User, audit_log: Optional[AuditLog] = None) -> None:
+    def __init__(self, user: User, audit_log: AuditLog | None = None) -> None:
         self.user: User = user
-        self.session: Optional[Session] = None
+        self.session: Session | None = None
         self.audit_log: AuditLog = audit_log if audit_log is not None else AuditLog()
 
     def login(self, username: str, password: str, ip: str) -> bool:
