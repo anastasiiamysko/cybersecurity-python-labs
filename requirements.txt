@@ -1,1 +1,5 @@
 ruff>=0.1.0
+fastapi
+uvicorn
+pydantic
+
